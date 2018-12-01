@@ -12,7 +12,7 @@ namespace Day01
         static void Main()
         {
             Console.WriteLine("Day 1 Part 1 result : " + PartOne());
-            Console.WriteLine("Day 2 Part 2 result : " + PartTwo());
+            Console.WriteLine("Day 1 Part 2 result : " + PartTwo());
 
             Console.ReadKey();
         }
