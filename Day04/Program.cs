@@ -38,7 +38,6 @@ namespace Day04
                         currentId = Convert.ToInt32(line.info[4]);
                         if (!entries.ContainsKey(currentId))
                             entries.Add(currentId, new Guard());
-
                         break;
                     case "falls":
                         entries[currentId].FellAsleep = line.date;
