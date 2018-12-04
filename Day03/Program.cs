@@ -55,7 +55,6 @@ namespace Day03
             return overlap;
         }
 
-        // 1124
         private static int PartTwo(string[] input)
         {
             var grid = GenerateGrid(input);
