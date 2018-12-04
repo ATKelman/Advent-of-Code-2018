@@ -10,65 +10,77 @@ namespace Day04
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Part One : " + PartOne());
+            Console.WriteLine("Answer: " + Solve());
 
             Console.ReadKey();
         }
 
-        private static int PartOne()
+        private static int Solve()
         {
-            var input = System.IO.File.ReadAllLines("input.txt");
-            var log = new Dictionary<DateTime, Entry>();
+            var input = System.IO.File.ReadAllLines("input.txt").OrderBy(x => DateTime.Parse(x.Substring(1, 16)))
+                .Select(x =>
+                {
+                    var information = x.Split(new[] { '[', ']', ' ', '#', ':' }, StringSplitOptions.RemoveEmptyEntries);
+                    return new
+                    {
+                        info = information,
+                        date = DateTime.Parse(x.Substring(1, 16))
+                    };
+                });
 
-            var entries = new List<Entry>();
-
+            var entries = new Dictionary<int, Guard>();
+            var currentId = -1;
             foreach (var line in input)
             {
-                var info = line.Split(new[] { '[', ']', ' ', '#', ':' }, StringSplitOptions.RemoveEmptyEntries);
+                switch (line.info[3])
+                {
+                    case "Guard":
+                        currentId = Convert.ToInt32(line.info[4]);
+                        if (!entries.ContainsKey(currentId))
+                            entries.Add(currentId, new Guard());
 
-                var date = DateTime.Parse(info[0]);
-                var entry = new Entry();
-
-                if (log.ContainsKey(date.Date))
-                {
-                    entry = log[date.Date];
-                }
-                else
-                {
-                    entry.Date = date;
-                    log.Add(date, entry);
-                }
-                
-                switch (info[3])
-                {
+                        break;
                     case "falls":
-                        entry.MinuteFallAsleep = Convert.ToInt32(info[2]);
+                        entries[currentId].FellAsleep = line.date;
                         break;
                     case "wakes":
-                        entry.MinuteWakeUp = Convert.ToInt32(info[2]);
-                        break;
-                    case "Guard":
-                        entry.GuardId = Convert.ToInt32(info[4]);
+                        entries[currentId].WokeUp = line.date;
+                        entries[currentId].AddSleep();
                         break;
                     default:
-
-                        break;
+                        throw new ArgumentException("Invalid message");
                 }
             }
 
-            var highestOccuringId = log.OrderBy(x => x.Value.GuardId);
-            
+            // ------------- Part 1 Solution ------------------
+            // var sleptLongestID = entries.OrderByDescending(x => x.Value.TimeSlept).First();
+            // return sleptLongestID.Key * Array.IndexOf(sleptLongestID.Value.Sleep, sleptLongestID.Value.Sleep.OrderByDescending(x => x).First());
 
-
-            return 0;
+            var sleptLongestSameTimeId = entries.OrderByDescending(x => x.Value.Sleep.Max()).First();
+            return sleptLongestSameTimeId.Key * Array.IndexOf(sleptLongestSameTimeId.Value.Sleep, sleptLongestSameTimeId.Value.Sleep.OrderByDescending(x => x).First());
         }
 
-        private class Entry
+        private class Guard
         {
-            public DateTime Date { get; set; }
-            public int GuardId { get; set; }
-            public int MinuteFallAsleep { get; set; }
-            public int MinuteWakeUp { get; set; }
+            public DateTime FellAsleep { get; set; }
+            public DateTime WokeUp { get; set; }
+            public int[] Sleep { get; set; }
+            public int TimeSlept { get; set; }
+
+            public Guard()
+            {
+                Sleep = new int[60];
+            }
+
+            public void AddSleep()
+            {
+                var timeSlept = (WokeUp - FellAsleep).Minutes;
+                for (int i = FellAsleep.Minute; i < (FellAsleep.Minute + timeSlept); i++)
+                {
+                    Sleep[(i%60)]++;
+                }
+                TimeSlept += timeSlept;
+            }
         }
     }
 }
