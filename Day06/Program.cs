@@ -36,20 +36,22 @@ namespace Day06
 
             var grid = new int[arraySizeX, arraySizeY];
 
-            for (int i = 0; i < input.Count();  i++)
-            {
-                grid[input[i].X, input[i].Y] = input[i].LocationName;
-            }
+            //for (int i = 0; i < input.Count();  i++)
+            //{
+            //    grid[input[i].X, input[i].Y] = input[i].LocationName;
+            //}
 
+			var countHasLess = 0;
             for (int x = 0; x < arraySizeX; x++)
             {
                 for (int y = 0; y < arraySizeY; y++)
                 {
                     var shortestDistance = int.MaxValue;
                     var locationValue = 0;
+					var maxDistanceIsLess = 0;
                     foreach (var location in input)
                     {
-                        var distance = CalculateManhattan(new int[2] { x, y }, new int[2] { location.X, location.Y });
+						var distance = Math.Abs(x - location.X) + Math.Abs(y - location.Y);
 
                         if (distance < shortestDistance)
                         {
@@ -60,7 +62,13 @@ namespace Day06
                         {
                             locationValue = 0;
                         }
+						maxDistanceIsLess += distance;
                     }
+
+					if (maxDistanceIsLess < 10000)
+					{
+						countHasLess++;
+					}
 
                     grid[x, y] = locationValue;
                 }            
@@ -85,16 +93,11 @@ namespace Day06
                 }
             }
 
-            var order = occurance.OrderByDescending(x => x.Value);
+			var order = occurance.Where(x=> !infinite.Contains(x.Key)).OrderByDescending(x => x.Value);
 
-            return 0;
-        }
+			var test = countHasLess;
 
-        private static int CalculateManhattan(int[] start, int[] end)
-        {
-            var distX = Math.Abs(start[0] - end[0]);
-            var distY = Math.Abs(start[1] - end[1]);
-            return distX + distY;
+			return order.First().Value;
         }
     }
 }
