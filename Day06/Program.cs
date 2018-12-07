@@ -36,11 +36,6 @@ namespace Day06
 
             var grid = new int[arraySizeX, arraySizeY];
 
-            //for (int i = 0; i < input.Count();  i++)
-            //{
-            //    grid[input[i].X, input[i].Y] = input[i].LocationName;
-            //}
-
 			var countHasLess = 0;
             for (int x = 0; x < arraySizeX; x++)
             {
