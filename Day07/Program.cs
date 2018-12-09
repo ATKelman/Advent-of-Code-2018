@@ -9,55 +9,12 @@ namespace Day07
     {
         static void Main(string[] args)
         {
-            //Console.WriteLine("Day 7 Part 1: " + PartOne());
-            //Console.WriteLine("Day 7 Part 2: " + PartTwo());
-            Day7Part2.Solve();
+            Console.WriteLine("Day 7 Part 1: " + PartOne());
+            Console.WriteLine("Day 7 Part 2: " + PartTwo());
+            //Day7Part2.Solve();
 
 
             Console.ReadKey();
-        }
-
-        public class Step
-        {
-            public char Name { get; set; }
-
-            public int Time { get; set; }
-            public List<char> Before { get; set; } = new List<char>();
-        }
-
-        public static class Day7Part2
-        {
-            private static string[] InputLines => System.IO.File.ReadAllLines("input.txt");
-
-
-
-            public static void Solve()
-            {
-                List<Step> steps = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".Select((c, i) => new Step { Name = c, Time = 61 + i }).ToList();
-                List<Step> next;
-                char before = '\0', after = '\0';
-                int workers = 5;
-                int sec = 0;
-                foreach (string line in InputLines)
-                {
-                    MatchCollection matches = Regex.Matches(line, @"\b[A-Z]\b");
-                    before = char.Parse(matches[0].Value);
-                    after = char.Parse(matches[1].Value);
-
-                    steps.First(s => s.Name == after).Before.Add(before);
-                }
-
-                while (steps.Count > 0)
-                {
-                    next = steps.Where(s => s.Before.Count == 0).OrderBy(s => s.Time).Take(workers).ToList();
-                    next.ForEach(s => s.Time--);
-                    steps.ForEach(s => s.Before.RemoveAll(n => steps.Where(p => p.Time == 0).Select(p => p.Name).Contains(n)));
-                    steps.RemoveAll(s => s.Time == 0);
-                    sec++;
-                }
-
-                Console.WriteLine($"It will take { sec }s to complete all the steps.");
-            }
         }
 
         private static string PartOne()
@@ -94,6 +51,7 @@ namespace Day07
 
             var observedNodes = new List<Node>();
             observedNodes.AddRange(words.Values.Where(x => x.Parents.Count() == 0));
+            var nodesToAdd = new List<Node>();
 
             var time = 0;
             var result = "";
@@ -106,17 +64,8 @@ namespace Day07
                 {
                     if (!worker.IsWorking && observedNodes.Any())
                     {
-                        worker.CurrentNode = observedNodes[0] ?? null;
+                        worker.CurrentNode = observedNodes[0];
                         observedNodes.Remove(worker.CurrentNode);
-
-                        foreach (var child in worker.CurrentNode.Children)
-                        {
-                            child.Parents.Remove(worker.CurrentNode);
-                            if (child.Parents.Count == 0)
-                            {
-                                observedNodes.Add(child);
-                            }
-                        }
 
                         worker.CurrentWorkTime = 0;
                         worker.CompletionTime = (worker.CurrentNode.Name[0] - 'A') + 61;
@@ -130,11 +79,27 @@ namespace Day07
                         if (worker.CurrentWorkTime == worker.CompletionTime)
                         {
                             result += worker.CurrentNode.Name;
-                          
+
+                            foreach (var child in worker.CurrentNode.Children)
+                            {
+                                child.Parents.Remove(worker.CurrentNode);
+                                if (child.Parents.Count == 0)
+                                {
+                                    nodesToAdd.Add(child);
+                                }
+                            }
+
                             worker.IsWorking = false;
                         }
                     }
                 }
+
+                if(nodesToAdd.Any())
+                {
+                    nodesToAdd.ForEach(x => observedNodes.Add(x));
+                    nodesToAdd = new List<Node>();
+                }
+
                 time++;
             }
 

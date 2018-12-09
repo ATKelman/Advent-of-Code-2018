@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Day09
 {
@@ -14,7 +12,7 @@ namespace Day09
         static void Main(string[] args)
         {
             Console.WriteLine("Day 9 Part 1: " + CalculateScore(PLAYERS, MARBLES));
-            Console.WriteLine("Day 9 Part 1: " + CalculateScore(PLAYERS, MARBLES * 100));
+            Console.WriteLine("Day 9 Part 2: " + CalculateScore(PLAYERS, MARBLES * 100));
 
             Console.ReadKey();
         }
@@ -23,6 +21,7 @@ namespace Day09
         {
             var scores = new long[players];
             var circle = new LinkedList<int>();
+           
             var current = circle.AddFirst(0);
 
             for (int i = 1; i < marbles; i++)
