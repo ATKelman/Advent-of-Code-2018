@@ -8,14 +8,15 @@ namespace Day07
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Day 7 Part 1; " + PartOne());
+            Console.WriteLine("Day 7 Part 1: " + PartOne());
 
             Console.ReadKey();
         }
 
 		private static string PartOne()
 		{
-			var input = System.IO.File.ReadAllLines("input.txt").Select(x =>
+            var words = new Dictionary<string, Node>();
+            System.IO.File.ReadAllLines("input.txt").Select(x =>
 			{
 				var splitLine = x.Split(' ');
 				return new
@@ -23,32 +24,15 @@ namespace Day07
 					Start = splitLine[1],
 					End = splitLine[7]
 				};
-			});
+			}).ToList().ForEach(x =>
+            {
+                if (!words.ContainsKey(x.Start)) { words.Add(x.Start, new Node() { Name = x.Start }); }
+                if (!words.ContainsKey(x.End)) { words.Add(x.End, new Node() { Name = x.End }); }
 
-			var words = new Dictionary<string, Node>();
-			foreach (var line in input)
-			{
-				if (!words.ContainsKey(line.Start))
-				{
-					words.Add(line.Start, new Node()
-					{
-						Name = line.Start
-					});
-				}
-
-				if (!words.ContainsKey(line.End))
-				{
-					words.Add(line.End, new Node()
-					{
-						Name = line.End
-					});
-				}
-
-				words[line.Start].Children.Add(words[line.End]);
-				words[line.End].Parents.Add(words[line.Start]);
-			}
-
-			
+                words[x.Start].Children.Add(words[x.End]);
+                words[x.End].Parents.Add(words[x.Start]);
+            });
+		
 			var observedNodes = new List<Node>();
 			observedNodes.AddRange(words.Values.Where(x => x.Parents.Count() == 0));
 
