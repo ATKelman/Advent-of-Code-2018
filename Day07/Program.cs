@@ -11,8 +11,6 @@ namespace Day07
         {
             Console.WriteLine("Day 7 Part 1: " + PartOne());
             Console.WriteLine("Day 7 Part 2: " + PartTwo());
-            //Day7Part2.Solve();
-
 
             Console.ReadKey();
         }
@@ -51,53 +49,58 @@ namespace Day07
 
             var observedNodes = new List<Node>();
             observedNodes.AddRange(words.Values.Where(x => x.Parents.Count() == 0));
-            var nodesToAdd = new List<Node>();
+            var timers = new (char Letter, int Timer)[26];
 
+            for (int i = 0; i < timers.Length; i++)
+            {
+                timers[i].Letter = (char)(65 + i);
+                timers[i].Timer = 61 + i;
+            }
+
+            var workers = new char?[5] { null, null, null, null, null };
             var time = 0;
-            var result = "";
-            var workers = new Worker[5] { new Worker(), new Worker(), new Worker(), new Worker(), new Worker() };
-
-            while (result.Length < words.Keys.Count())
+            while (timers.Any(x => x.Timer > 0))
             {
                 observedNodes = observedNodes.OrderBy(x => x.Name).ToList();
-                foreach (var worker in workers)
+
+                for (int i = 0; i < workers.Length; i++)
                 {
-                    if (!worker.IsWorking && observedNodes.Any())
+                    if (workers[i] == null && observedNodes.Any())
                     {
-                        worker.CurrentNode = observedNodes[0];
-                        observedNodes.Remove(worker.CurrentNode);
-
-                        worker.CurrentWorkTime = 0;
-                        worker.CompletionTime = (worker.CurrentNode.Name[0] - 'A') + 61;
-
-                        worker.IsWorking = true;
+                        workers[i] = observedNodes[0].Name[0];
+                        observedNodes.RemoveAt(0);
                     }
 
-                    if (worker.IsWorking)
+                    if (workers[i] != null)
                     {
-                        worker.CurrentWorkTime += 1;
-                        if (worker.CurrentWorkTime == worker.CompletionTime)
-                        {
-                            result += worker.CurrentNode.Name;
-
-                            foreach (var child in worker.CurrentNode.Children)
-                            {
-                                child.Parents.Remove(worker.CurrentNode);
-                                if (child.Parents.Count == 0)
-                                {
-                                    nodesToAdd.Add(child);
-                                }
-                            }
-
-                            worker.IsWorking = false;
-                        }
-                    }
+                        var timer = timers.Where(x => x.Letter.Equals(workers[i])).Single();
+                        timers[timer.Letter - 65] = (timer.Letter, timer.Timer - 1);
+                    }         
                 }
 
-                if(nodesToAdd.Any())
+                if (timers.Any(x => x.Timer == 0))
                 {
-                    nodesToAdd.ForEach(x => observedNodes.Add(x));
-                    nodesToAdd = new List<Node>();
+                    timers.Where(x => x.Timer == 0).ToList().ForEach(x =>
+                    {
+                        for (int i = 0; i < workers.Length; i++)
+                        {
+                            if (workers[i].HasValue)
+                            {
+                                if (workers[i].Value.Equals(x.Letter))
+                                {
+                                    words.Where(y => y.Value.Name == workers[i].Value.ToString()).Single().Value.Children.ForEach(c =>
+                                    {
+                                        c.Parents.Remove(words.Where(y => y.Value.Name == workers[i].Value.ToString()).Single().Value);
+                                        if (c.Parents.Count() == 0) { observedNodes.Add(c); }
+                                    });
+
+                                    workers[i] = null;
+                                }
+                            }
+                        }
+                       
+                        timers[x.Letter - 65] = (x.Letter, x.Timer - 1);
+                    });
                 }
 
                 time++;
@@ -139,20 +142,6 @@ namespace Day07
 				Parents = new List<Node>();
 				Children = new List<Node>();
 			}
-        }
-
-        public class Worker
-        {
-            public Node CurrentNode { get; set; }
-            public bool IsWorking { get; set; }
-            public int CurrentWorkTime { get; set; }
-            public int CompletionTime { get; set; }
-
-            public Worker()
-            {
-                CurrentNode = null;
-                IsWorking = false;
-            }
         }
     }
 }
