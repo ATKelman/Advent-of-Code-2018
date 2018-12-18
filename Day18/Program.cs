@@ -30,14 +30,12 @@ namespace Day18
                 }
             }
 
-            for (var minutes = 0; minutes < 1000000000; minutes++)
+            for (var minutes = 0; minutes < 10; minutes++)
             {
                 var newForest = new char[50, 50];
                 for (int x = 0; x < 50; x++)
-                //for (int y = 0; y < 10; y++)
                 {
                     for (int y = 0; y < 50; y++)
-                    //for (int x = 0; x < 10; x++)
                     {
                         int countOpen = 0;
                         var countTrees = 0;
